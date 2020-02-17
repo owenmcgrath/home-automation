@@ -14,15 +14,16 @@ Here are my requirements
 - Interfaces must be modern both physically and in software (no hacky electronics, bad UI)
 
 In Progress
--Dual Control thermostat
--Server
+- Dual Control thermostat
+- Server
 
 To Do
--Android Application C2 Interface
--Remote light switch
--Home network modifications
+- Android Application C2 Interface, with scheduling and monitoring
+- Remote light switch
+- Home network modifications
 
 Maybes
--Motion aware/tracking device
--Automated outdoor spicket control (gardening etc)
--Enhanced energy usage & monitoring
+- Motion aware/tracking device
+- Automated outdoor spicket control (gardening etc)
+- Enhanced energy usage & monitoring
+- Machine learning
