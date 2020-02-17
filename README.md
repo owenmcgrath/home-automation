@@ -13,16 +13,16 @@ Here are my requirements
 - Software must be scalable for ease of additions of new devices and configurability
 - Interfaces must be modern both physically and in software (no hacky electronics, bad UI)
 
-In Progress:
+In Progress
 -Dual Control thermostat
 -Server
 
-To Do:
+To Do
 -Android Application C2 Interface
 -Remote light switch
 -Home network modifications
 
-Maybes:
+Maybes
 -Motion aware/tracking device
 -Automated outdoor spicket control (gardening etc)
 -Enhanced energy usage & monitoring
