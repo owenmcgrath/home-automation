@@ -31,7 +31,9 @@ class HomeIOLink(asyncore.dispatcher):
 class Thermostat(HomeIOLink):
 
 	THERMOSTAT_STATUS_FORMAT = 'BHH'
-	
+	THERMOSTAT_SCHEDULE_HEADER_FORMAT = 'BB'
+	THERMOSTAT_SCHEDULE_FORMAT = ''
+
 	def __init__(self, myId, myIp, partnerId, partnerIp):
 		super.__init__(self, myId, myIp, partnerId, partnerIp)
 		self.m_schedules = {}

@@ -1,5 +1,6 @@
 import socket
 
+
 #get broadcast ip address
 import socket
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
