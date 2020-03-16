@@ -1,12 +1,22 @@
-import socket
+import HomeIO
+import time
+import asyncore
+import threading
 
+def RunAsyncore():
+	asyncore.loop();
 
-#get broadcast ip address
-import socket
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(("8.8.8.8", 80))
-broadcastip = s.getsockname()[0]
-broadcastip = broadcastip[0:broadcastip.rindex(".")] + ".255"
-s.close()
+SERVER_ID = 0
 
-print(broadcastip)
+broadcaster = HomeIO.HomeIOBroadcast(SERVER_ID)
+
+timer = 0
+
+threading.Thread(target = RunAsyncore)
+
+while True:
+	currTime = time.time()
+	if currTime - timer > 1:
+		timer = currTime
+		print("Sending Broadcast")
+		broadcaster.SendBroadcast()

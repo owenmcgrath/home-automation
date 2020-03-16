@@ -1,0 +1,30 @@
+Message Format .txt
+Member : Variable : FormatChar for pystruct lib
+
+HEADER
+m_sourceId unsigned char 'B'
+m_destinationId unsigned char 'B'
+m_type unsigned char 'B' (0 = report, 1 = command)
+m_messageId unsigned char 'B'
+
+===========================
+CONNECTION STATUS MESSAGES
+===========================
+HEARTBEAT 0
+(no members just header)
+
+===========================
+THERMOSTAT MESSAGES
+===========================
+
+THERMOSTAT_STATE 10 (thermostat sends its status)
+m_setting unsigned char 'B' units of 1 F
+m_temperature unsigned short 'H' units of .1 F
+
+THERMOSTAT_SCHEDULE 11
+m_day unsigned char 'B' (enumerated day of the week)
+m_numSections unsigned char 'B' (number of scheduled time slots)
+	//section// (1 to many)
+	m_hour unsigned char 'B'
+	m_minute unsigned char 'B'
+	m_setting unsigned char 'B' units of 1F
