@@ -1,4 +1,4 @@
-import asyncore,socket, queue, struct
+import socketserver, socket, queue, struct
 import time
 
 BASE_PORT = 50000
@@ -9,31 +9,38 @@ REPORT = 0
 HEARTBEAT_ID = 0
 
 
-class HomeIOLink(asyncore.dispatcher):
+class UDPHandler(socketserver.BaseRequestHandler):
+
+	def __init__(self):
+		self.m_receiveQueue = queue.Queue()
+
+	def handle(self):
+		data = self.request[0].strip()
+		self.m_receiveQueue.put(data)
+
+	def GetData(self):
+		if(self.m_receiveQueue.qsize() > 0):
+			return self.m_receiveQueue.get()
+		else:
+			return None
+
+
+class HomeIOLink():
 
 	def __init__(self, myId, partnerId, partnerIp, isBroadcast):
-		asyncore.dispatcher.__init__(self)
 		self.m_myId = myId
 		self.m_partnerId = partnerId
 		self.m_partnerIp = partnerIp
-		self.create_socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.m_server = socketserver.UDPServer((self.GetLocalIp(), BASE_PORT + myId), UDPHandler)
+		self.m_server.RequestHandlerClass.__init__(self.m_server.RequestHandlerClass)
+		self.m_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		if isBroadcast:
-			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-		self.bind((self.GetLocalIp(), BASE_PORT + myId))
-		self.m_sendQueue = queue.Queue()
-		self.m_lastReceiveTime = None
+			self.m_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+			self.m_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
-	def handle_close(self):
-		self.close()
-
-	def writable(self):
-		return self.m_sendQueue.qsize() > 0
-
-	def handle_write(self):
-		msg = self.m_sendQueue.get()
+	def Write(self, msg):
 		print(str(msg) + " " + str(self.m_partnerId) + " " + str(self.m_partnerIp))
-		self.socket.sendto(msg, self.m_partnerIp, self.m_partnerId + BASE_PORT)
+		self.m_socket.sendto(msg, (self.m_partnerIp, self.m_partnerId + BASE_PORT))
 
 	def GetLocalIp(self):
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -94,24 +101,28 @@ class HomeIOBroadcast(HomeIOLink):
 
 	def __init__(self, myId):
 		broadcastIp = self.GetBroadcastIP()
-		super(HomeIOBroadcast, self).__init__(0, 0, broadcastIp, True)
+		super().__init__(0, 0, broadcastIp, True)
 		self.m_broadcastIp = broadcastIp
 		self.localID = myId
 
-	def handle_read(self):
-		recvBuffer, addr = self.recvfrom(8192)
+	def ProcessReadQueue(self):
 
-		if len(recvBuffer) != 4:
-			return 
+		data = self.m_server.RequestHandlerClass.GetData(self.m_server.RequestHandlerClass)
+		while(data != None):			
 
-		sourceId, destinationId, msgType, msgId = unpack(HEADER_FORMAT, recvBuffer)
+			if len(data) != 4:
+				return 
 
-		if sourceId not in p_devicesConnected.keys():
-			p_devicesConnected[sourceId] = addr
+			sourceId, destinationId, msgType, msgId = unpack(HEADER_FORMAT, recvBuffer)
+
+			if sourceId not in p_devicesConnected.keys():
+				p_devicesConnected[sourceId] = addr
+
+			data = self.m_server.RequestHandlerClass.GetData(self.m_server.RequestHandlerClass)
 
 	def SendBroadcast(self):
 		header = struct.pack(HEADER_FORMAT, self.localID, 0, REPORT, HEARTBEAT_ID)
-		self.m_sendQueue.put(header)
+		self.Write(header)
 
 	def GetBroadcastIP(self):
 		localIp = self.GetLocalIp()
