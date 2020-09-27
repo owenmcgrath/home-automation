@@ -11,16 +11,15 @@ HEARTBEAT_ID = 0
 
 class UDPHandler(socketserver.BaseRequestHandler):
 
-	def __init__(self):
-		self.m_receiveQueue = queue.Queue()
-
 	def handle(self):
 		data = self.request[0].strip()
-		self.m_receiveQueue.put(data)
+		self.m_received = data
 
 	def GetData(self):
-		if(self.m_receiveQueue.qsize() > 0):
-			return self.m_receiveQueue.get()
+		#print(str(hasattr(self, 'm_receiveQueue'))) #+ " " + str(self.m_receiveQueue.qsize())
+		if(hasattr(self, 'm_received')):
+			data = self.m_received
+			return data
 		else:
 			return None
 
@@ -32,7 +31,8 @@ class HomeIOLink():
 		self.m_partnerId = partnerId
 		self.m_partnerIp = partnerIp
 		self.m_server = socketserver.UDPServer((self.GetLocalIp(), BASE_PORT + myId), UDPHandler)
-		self.m_server.RequestHandlerClass.__init__(self.m_server.RequestHandlerClass)
+#		self.m_server.RequestHandlerClass.__init__(self.m_server.RequestHandlerClass)
+		self.m_server.timeout = .1
 		self.m_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		if isBroadcast:
 			self.m_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -106,10 +106,11 @@ class HomeIOBroadcast(HomeIOLink):
 		self.localID = myId
 
 	def ProcessReadQueue(self):
-
-		data = self.m_server.RequestHandlerClass.GetData(self.m_server.RequestHandlerClass)
+		self.m_server.handle_request()
+		data = self.m_server.RequestHandlerClass.GetData()
 		while(data != None):			
 
+			print("Gets To Here")
 			if len(data) != 4:
 				return 
 

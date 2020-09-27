@@ -2,7 +2,7 @@ import HomeIO
 import time
 import threading
 
-SERVER_ID = 0
+SERVER_ID = 10
 
 timer = 0
 
@@ -15,6 +15,8 @@ while True:
 		timer = currTime
 		print("Sending Broadcast")
 		broadcaster.SendBroadcast()
+		for x in broadcaster.p_devicesConnected:
+			print(x)
 
 
 
